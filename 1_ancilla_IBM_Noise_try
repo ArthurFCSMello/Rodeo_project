@@ -1,0 +1,135 @@
+# VOLTANDO A 1 ANCILLA
+# TO TENTANDO CORRIGIR AINDA
+# Simulação ruidosa simulando um erro real
+#Circuito com entrada ruidosa
+#Variação no codigo para gerar um plot Probabilidade x Energias
+#Com flags de progresso
+import numpy as np
+import matplotlib.pyplot as plt
+import random
+from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
+from qiskit_aer import AerSimulator
+from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
+from qiskit_aer.noise import NoiseModel, depolarizing_error
+from qiskit_ibm_runtime.fake_provider import FakeManilaV2
+from qiskit_aer.noise import NoiseModel
+
+# ---> NOVO IMPORT DA BARRA DE PROGRESSO <---
+from tqdm.auto import tqdm
+
+def create_rodeo_cycle(t_list, E_target, J, h, num_qubits, trotter_steps=10):
+    """
+    Cria o circuito completo do Algoritmo de Rodeio usando uma lista predefinida de tempos.
+    """
+    ciclos = len(t_list)
+    qr_sys = QuantumRegister(num_qubits, 'sys')
+    qr_anc = QuantumRegister(1, 'anc')
+    cr_anc = ClassicalRegister(1, 'meas')
+    qc = QuantumCircuit(qr_sys, qr_anc, cr_anc)
+
+    qc.x(qr_anc)
+
+
+
+    for m in range(ciclos):
+        t = t_list[m]
+        dt = t / trotter_steps
+
+        # 1 e 2. Inicialização e Hadamard
+
+        qc.h(qr_anc)
+
+        # 3. Trotterização controlada
+        for _ in range(trotter_steps):
+            # Termo X (Campo Transverso)
+            for i in range(num_qubits):
+                qc.crx(-2 * h * dt, qr_anc, qr_sys[i])
+            # Termo ZZ (Ising)
+            for i in range(num_qubits - 1):
+                qc.cx(qr_sys[i], qr_sys[i+1])
+                qc.crz(-2 * J * dt, qr_anc, qr_sys[i+1])
+                qc.cx(qr_sys[i], qr_sys[i+1])
+
+        # 4. Fase da Ancila
+        qc.p(E_target * t , qr_anc)
+
+
+        # 5 e 6. Hadamard final e Medição
+        qc.h(qr_anc)
+        qc.measure(qr_anc, cr_anc)
+        # PORTA DE RETORNO CONDICIONAL PÓS MEDIÇÃO
+        # SE MEDIR 0:
+
+        # Só reiniciar a phase
+        qc.p(-E_target * t , qr_anc)
+        # SE MEDIR 1:
+        #Reinicia a fase e NOT
+        qc.p(-E_target * t , qr_anc)
+        qc.x(qr_anc)
+
+    return qc
+
+# --- Parâmetros da Simulação ---
+J_coupling = 1.0
+h_field = 1.5
+num_qubits = 4
+ciclos = 10        # Número de ciclos do rodeio (tamanho do filtro)
+shots = 1000
+
+# 1. Gerar os tempos aleatórios fixos (t_n) para este scan usando Gaussiana
+t_rms = 5.0
+t_list = np.random.normal(0, t_rms, ciclos)
+
+# 2. Preparar a varredura de energia
+E_scan = np.linspace(-8, 8, 50) # 50 pontos entre -8 e 8
+prob_sucesso = []
+
+print("Baixando o perfil de ruído e topologia do IBM Manila (5 qubits)...")
+
+# 1. Instancia o "gêmeo digital" da máquina física
+maquina_real = FakeManilaV2()
+
+# 2. Extrai o modelo de ruído exato (Erros térmicos T1/T2, erros de porta, de medição)
+noise_model = NoiseModel.from_backend(maquina_real)
+
+# 3. Extrai a topologia (o mapa físico de fios que conectam os 5 qubits)
+topologia = maquina_real.coupling_map
+
+# 4. Configuração do simulador com o hardware da IBM
+backend = AerSimulator(noise_model=noise_model, coupling_map=topologia)
+
+
+pm = generate_preset_pass_manager(backend=backend, optimization_level=3)
+
+print("Iniciando varredura de energia no Qiskit...")
+
+# 3. Executar o circuito para cada valor de E_target
+#sucesso_str = "1" * ciclos
+
+# ---> MUDANÇA AQUI: Loop for envolvido pelo tqdm <---
+for E in tqdm(E_scan, desc="Progresso da Simulação"):
+    # Cria o circuito com a energia da iteração atual
+    qc = create_rodeo_cycle(t_list, E, J_coupling, h_field, num_qubits)
+    transpiled_qc = pm.run(qc)
+
+    # Executa o circuito
+    result = backend.run(transpiled_qc, shots=shots).result()
+    counts = result.get_counts()
+
+    # Extrai o número de vezes que TODAS as ancilas deram 1
+    sucessos = counts.get("1", 0)
+    prob_sucesso.append(sucessos / shots)
+
+print("\nSimulação concluída!")
+
+# --- 4. Plotar o Resultado ---
+plt.figure(figsize=(10, 6))
+plt.plot(E_scan, prob_sucesso, 'b-o', linewidth=2, label=f'Qiskit Signal ({ciclos} cycles)')
+plt.xticks(np.arange(-7.5, 7.5, step=2.5))
+plt.title(f'Simulated Spectrum in Qiskit (Ising Model L={num_qubits})')
+plt.xlabel('Target Energy (E_target)')
+plt.ylabel('Success Probability P(N)')
+plt.grid(True, alpha=0.3)
+plt.legend()
+plt.tight_layout()
+plt.show()
