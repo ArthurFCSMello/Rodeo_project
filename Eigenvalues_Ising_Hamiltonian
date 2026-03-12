@@ -1,4 +1,4 @@
-#Variação no codigo para gerar um plot Probabilidade x Energias
+# Variation in the code to generate a Probability vs Energy plot
 import numpy as np
 import matplotlib.pyplot as plt
 import random
@@ -8,7 +8,7 @@ from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 
 def create_rodeo_cycle(t_list, E_target, J, h, num_qubits, trotter_steps=20):
     """
-    Cria o circuito completo do Algoritmo de Rodeio usando uma lista predefinida de tempos.
+    Creates the complete Rodeo Algorithm circuit using a predefined list of times.
     """
     ciclos = len(t_list)
     qr_sys = QuantumRegister(num_qubits, 'sys')
@@ -20,72 +20,72 @@ def create_rodeo_cycle(t_list, E_target, J, h, num_qubits, trotter_steps=20):
         t = t_list[m]
         dt = t / trotter_steps
 
-        # 1 e 2. Inicialização e Hadamard
+        # 1 and 2. Initialization and Hadamard
         qc.x(qr_anc[m])
         qc.h(qr_anc[m])
 
-        # 3. Trotterização controlada
+        # 3. Controlled Trotterization
         for _ in range(trotter_steps):
-            # Termo X (Campo Transverso)
+            # X Term (Transverse Field)
             for i in range(num_qubits):
                 qc.crx(-2 * h * dt, qr_anc[m], qr_sys[i])
-            # Termo ZZ (Ising)
+            # ZZ Term (Ising)
             for i in range(num_qubits - 1):
 
                 qc.cx(qr_sys[i], qr_sys[i+1])
                 qc.crz(-2 * J * dt, qr_anc[m], qr_sys[i+1])
                 qc.cx(qr_sys[i], qr_sys[i+1])
 
-        # 4. Fase da Ancila
+        # 4. Ancilla Phase
         qc.p(E_target * t, qr_anc[m])
 
-        # 5 e 6. Hadamard final e Medição
+        # 5 and 6. Final Hadamard and Measurement
         qc.h(qr_anc[m])
         qc.measure(qr_anc[m], cr_anc[m])
 
     return qc
 
-# --- Parâmetros da Simulação ---
+# --- Simulation Parameters ---
 J_coupling = 1.0
 h_field = 1.5
 num_qubits = 4
-ciclos = 10        # Número de ciclos do rodeio (tamanho do filtro)
+ciclos = 10        # Number of rodeo cycles (filter size)
 shots = 20000
 
-# 1. Gerar os tempos aleatórios fixos (t_n) para este scan usando Gaussiana
-# t_RMS define a largura do filtro de energia.
+# 1. Generate the fixed random times (t_n) for this scan using a Gaussian
+# t_RMS defines the width of the energy filter.
 t_rms = 5.0
 t_list = np.random.normal(0, t_rms, ciclos)
 
-# 2. Preparar a varredura de energia
-E_scan = np.linspace(-8, 8, 300) # 40 pontos entre -4 e 4
+# 2. Prepare the energy scan
+E_scan = np.linspace(-8, 8, 300) # 300 points between -8 and 8
 prob_sucesso = []
 
-# Configuração do simulador
+# Simulator configuration
 backend = AerSimulator()
 pm = generate_preset_pass_manager(backend=backend, optimization_level=1)
 
-print("Iniciando varredura de energia no Qiskit...")
+print("Starting energy scan in Qiskit...")
 
-# 3. Executar o circuito para cada valor de E_target
-sucesso_str = "1" * ciclos  # A string de medição alvo (ex: '1111')
+# 3. Execute the circuit for each E_target value
+sucesso_str = "1" * ciclos  # The target measurement string (e.g., '1111')
 
 for E in E_scan:
-    # Cria o circuito com a energia da iteração atual e OS MESMOS tempos t_list
+    # Creates the circuit with the current iteration's energy and THE SAME t_list times
     qc = create_rodeo_cycle(t_list, E, J_coupling, h_field, num_qubits)
     transpiled_qc = pm.run(qc)
 
-    # Executa o circuito
+    # Executes the circuit
     result = backend.run(transpiled_qc, shots=shots).result()
     counts = result.get_counts()
 
-    # Extrai o número de vezes que TODAS as ancilas deram 1
+    # Extracts the number of times ALL ancillas yielded 1
     sucessos = counts.get(sucesso_str, 0)
     prob_sucesso.append(sucessos / shots)
 
-print("Simulação concluída!")
+print("Simulation completed!")
 
-# --- 4. Plotar o Resultado ---
+# --- 4. Plot the Result ---
 plt.figure(figsize=(10, 6))
 plt.plot(E_scan, prob_sucesso, 'b-o', linewidth=2, label=f'Qiskit Signal ({ciclos} cycles)')
 plt.xticks(np.arange(-7.5, 7.5, step=2.5))
