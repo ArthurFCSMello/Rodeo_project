@@ -1,6 +1,6 @@
-#Circuito com entrada ruidosa
-#Variação no codigo para gerar um plot Probabilidade x Energias
-#Com flags de progresso
+# Circuit with noisy input
+# Variation in the code to generate a Probability vs Energy plot
+# With progress flags
 import numpy as np
 import matplotlib.pyplot as plt
 import random
@@ -9,12 +9,12 @@ from qiskit_aer import AerSimulator
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit_aer.noise import NoiseModel, depolarizing_error
 
-# ---> NOVO IMPORT DA BARRA DE PROGRESSO <---
+# ---> NEW PROGRESS BAR IMPORT <---
 from tqdm.auto import tqdm
 
 def create_rodeo_cycle(t_list, E_target, J, h, num_qubits, trotter_steps=10):
     """
-    Cria o circuito completo do Algoritmo de Rodeio usando uma lista predefinida de tempos.
+    Creates the complete Rodeo Algorithm circuit using a predefined list of times.
     """
     ciclos = len(t_list)
     qr_sys = QuantumRegister(num_qubits, 'sys')
@@ -26,92 +26,92 @@ def create_rodeo_cycle(t_list, E_target, J, h, num_qubits, trotter_steps=10):
         t = t_list[m]
         dt = t / trotter_steps
 
-        # 1 e 2. Inicialização e Hadamard
+        # 1 and 2. Initialization and Hadamard
         qc.x(qr_anc[m])
         qc.h(qr_anc[m])
 
-        # 3. Trotterização controlada
+        # 3. Controlled Trotterization
         for _ in range(trotter_steps):
-            # Termo X (Campo Transverso)
+            # X Term (Transverse Field)
             for i in range(num_qubits):
                 qc.crx(-2 * h * dt, qr_anc[m], qr_sys[i])
-            # Termo ZZ (Ising)
+            # ZZ Term (Ising)
             for i in range(num_qubits - 1):
                 qc.cx(qr_sys[i], qr_sys[i+1])
                 qc.crz(-2 * J * dt, qr_anc[m], qr_sys[i+1])
                 qc.cx(qr_sys[i], qr_sys[i+1])
 
-        # 4. Fase da Ancila
+        # 4. Ancilla Phase
         qc.p(E_target * t, qr_anc[m])
 
-        # 5 e 6. Hadamard final e Medição
+        # 5 and 6. Final Hadamard and Measurement
         qc.h(qr_anc[m])
         qc.measure(qr_anc[m], cr_anc[m])
 
     return qc
 
-# --- Parâmetros da Simulação ---
+# --- Simulation Parameters ---
 J_coupling = 1.0
 h_field = 1.5
 num_qubits = 4
-ciclos = 10        # Número de ciclos do rodeio (tamanho do filtro)
+ciclos = 10        # Number of rodeo cycles (filter size)
 shots = 500
 
-# 1. Gerar os tempos aleatórios fixos (t_n) para este scan usando Gaussiana
+# 1. Generate the fixed random times (t_n) for this scan using a Gaussian
 t_rms = 5.0
 t_list = np.random.normal(0, t_rms, ciclos)
 
-# 2. Preparar a varredura de energia
-E_scan = np.linspace(-8, 8, 50) # 50 pontos entre -8 e 8
+# 2. Prepare the energy scan
+E_scan = np.linspace(-8, 8, 50) # 50 points between -8 and 8
 prob_sucesso = []
 
-# --- Construção do Modelo de Ruído Realista ---
+# --- Construction of the Realistic Noise Model ---
 noise_model = NoiseModel()
 
-# Probabilidades de erro
+# Error probabilities
 prob_1_qubit = 0.001
 prob_2_qubits = 0.01
 
-# Criar os canais de erro despolarizante
+# Create depolarizing error channels
 error_1q = depolarizing_error(prob_1_qubit, 1)
 error_2q = depolarizing_error(prob_2_qubits, 2)
 
-# Adicionar os erros às portas
+# Add errors to the gates
 noise_model.add_all_qubit_quantum_error(error_1q, ['x', 'h', 'p'])
 noise_model.add_all_qubit_quantum_error(error_2q, ['cx', 'crx', 'crz'])
 
-# --- Configuração do simulador COM RUÍDO ---
+# --- Simulator configuration WITH NOISE ---
 backend = AerSimulator(noise_model=noise_model)
 pm = generate_preset_pass_manager(backend=backend, optimization_level=3)
 
-print("Iniciando varredura de energia no Qiskit...")
+print("Starting energy scan in Qiskit...")
 
-# 3. Executar o circuito para cada valor de E_target
+# 3. Execute the circuit for each E_target value
 sucesso_str = "1" * ciclos
 
-# ---> MUDANÇA AQUI: Loop for envolvido pelo tqdm <---
-for E in tqdm(E_scan, desc="Progresso da Simulação"):
-    # Cria o circuito com a energia da iteração atual
+# ---> CHANGE HERE: For loop wrapped by tqdm <---
+for E in tqdm(E_scan, desc="Simulation Progress"):
+    # Creates the circuit with the current iteration's energy
     qc = create_rodeo_cycle(t_list, E, J_coupling, h_field, num_qubits)
     transpiled_qc = pm.run(qc)
 
-    # Executa o circuito
+    # Executes the circuit
     result = backend.run(transpiled_qc, shots=shots).result()
     counts = result.get_counts()
 
-    # Extrai o número de vezes que TODAS as ancilas deram 1
+    # Extracts the number of times ALL ancillas yielded 1
     sucessos = counts.get(sucesso_str, 0)
     prob_sucesso.append(sucessos / shots)
 
-print("\nSimulação concluída!")
+print("\nSimulation completed!")
 
-# --- 4. Plotar o Resultado ---
+# --- 4. Plot the Result ---
 plt.figure(figsize=(10, 6))
-plt.plot(E_scan, prob_sucesso, 'b-o', linewidth=2, label=f'Sinal Qiskit ({ciclos} ciclos)')
+plt.plot(E_scan, prob_sucesso, 'b-o', linewidth=2, label=f'Qiskit Signal ({ciclos} cycles)')
 plt.xticks(np.arange(-7.5, 7.5, step=2.5))
-plt.title(f'Espectro Simulado no Qiskit (Modelo Ising L={num_qubits})')
-plt.xlabel('Energia Alvo (E_target)')
-plt.ylabel('Probabilidade de Sucesso P(N)')
+plt.title(f'Simulated Spectrum in Qiskit (Ising Model L={num_qubits})')
+plt.xlabel('Target Energy (E_target)')
+plt.ylabel('Success Probability P(N)')
 plt.grid(True, alpha=0.3)
 plt.legend()
 plt.tight_layout()
