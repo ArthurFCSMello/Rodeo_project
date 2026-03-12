@@ -1,0 +1,57 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{choi2021}
+\citation{choi2021}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Theoretical Framework}{1}{section.2}\protected@file@percent }
+\newlabel{sec:theory}{{2}{1}{Theoretical Framework}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}The Rodeo Filter}{1}{subsection.2.1}\protected@file@percent }
+\newlabel{eq:single}{{1}{1}{The Rodeo Filter}{equation.1}{}}
+\newlabel{eq:filter}{{2}{1}{The Rodeo Filter}{equation.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Transverse-Field Ising Model}{2}{subsection.2.2}\protected@file@percent }
+\newlabel{eq:ising}{{3}{2}{Transverse-Field Ising Model}{equation.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}1D Discrete Dirac Hamiltonian}{2}{subsection.2.3}\protected@file@percent }
+\newlabel{eq:dirac}{{4}{2}{1D Discrete Dirac Hamiltonian}{equation.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Implementation}{2}{section.3}\protected@file@percent }
+\newlabel{sec:impl}{{3}{2}{Implementation}{section.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Illustrative quantum circuit for a single rodeo cycle. The ancilla (top) controls the time evolution of the system register (bottom) over a sampled duration $t$, before accumulating the target energy phase and being measured. The \emph  {conditional reset} trick for single-ancilla hardware reuse applies an $X$ and a phase correction if measured in $\ket {1}$.}}{2}{figure.caption.2}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:circuit_diagram}{{1}{2}{Illustrative quantum circuit for a single rodeo cycle. The ancilla (top) controls the time evolution of the system register (bottom) over a sampled duration $t$, before accumulating the target energy phase and being measured. The \emph {conditional reset} trick for single-ancilla hardware reuse applies an $X$ and a phase correction if measured in $\ket {1}$}{figure.caption.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Circuit Depth Considerations.}{2}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Noise models.}{2}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Results}{2}{section.4}\protected@file@percent }
+\newlabel{sec:results}{{4}{2}{Results}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Noiseless Ising Spectrum}{2}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Effect of Noise}{2}{subsection.4.2}\protected@file@percent }
+\newlabel{lst:trotter}{{1}{3}{Controlled Trotter step for the Ising Hamiltonian (one slice)}{lstlisting.1}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1}{\ignorespaces Controlled Trotter step for the Ising Hamiltonian (one slice).}}{3}{lstlisting.1}\protected@file@percent }
+\newlabel{lst:single_ancilla}{{2}{3}{Single-ancilla rodeo filter with mid-circuit measurement and conditional phase reset for hardware execution}{lstlisting.2}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2}{\ignorespaces Single-ancilla rodeo filter with mid-circuit measurement and conditional phase reset for hardware execution.}}{3}{lstlisting.2}\protected@file@percent }
+\newlabel{lst:dirac_code}{{3}{3}{Increment logic for the Dirac kinetic hopping term}{lstlisting.3}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {3}{\ignorespaces Increment logic for the Dirac kinetic hopping term.}}{3}{lstlisting.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Reconstruction of the spectrum dynamically vs theoretical Hamiltonian eigenvalues (dashed stems) for the initial state $\ket {0000}$. At low $N$, the signal is highly oscillatory; as $N\to 30$, distinct exponential-decay peaks align exactly with the true eigenvalues.}}{4}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:reconstrucao}{{2}{4}{Reconstruction of the spectrum dynamically vs theoretical Hamiltonian eigenvalues (dashed stems) for the initial state $\ket {0000}$. At low $N$, the signal is highly oscillatory; as $N\to 30$, distinct exponential-decay peaks align exactly with the true eigenvalues}{figure.caption.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Noiseless rodeo spectrum for the Ising model ($L{=}4$, $J{=}1$, $h{=}1.5$). Ten rodeo cycles, 300 scan points, 3000 shots equivalent.}}{4}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:noiseless}{{3}{4}{Noiseless rodeo spectrum for the Ising model ($L{=}4$, $J{=}1$, $h{=}1.5$). Ten rodeo cycles, 300 scan points, 3000 shots equivalent}{figure.caption.9}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Same parameters as Fig.~\ref {fig:noiseless} but with 200 scan points, showing consistent peak positions.}}{4}{figure.caption.10}\protected@file@percent }
+\newlabel{fig:200pts}{{4}{4}{Same parameters as Fig.~\ref {fig:noiseless} but with 200 scan points, showing consistent peak positions}{figure.caption.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Noisy rodeo spectrum with custom depolarising errors ($noise\_level{=}0.15$); 10 cycles, 50 points.}}{4}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:noisy}{{5}{4}{Noisy rodeo spectrum with custom depolarising errors ($noise\_level{=}0.15$); 10 cycles, 50 points}{figure.caption.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Discrete Dirac Spectrum}{4}{subsection.4.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Expected rodeo spectrum for the 1D discrete Dirac Hamiltonian under two distinct mass parameters ($m=0.5$ top, $m=2.0$ bottom), showing accurate antimatter and matter eigenvalue extractions.}}{4}{figure.caption.12}\protected@file@percent }
+\newlabel{fig:dirac}{{6}{4}{Expected rodeo spectrum for the 1D discrete Dirac Hamiltonian under two distinct mass parameters ($m=0.5$ top, $m=2.0$ bottom), showing accurate antimatter and matter eigenvalue extractions}{figure.caption.12}{}}
+\bibcite{choi2021}{1}
+\bibcite{qiskit}{2}
+\bibcite{trotter}{3}
+\bibcite{wilson}{4}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Alternative Test: Heisenberg XXX Chain}{5}{subsection.4.4}\protected@file@percent }
+\newlabel{lst:heisenberg_code}{{4}{5}{Constructing the dense Hamiltonian matrix for the 1D Heisenberg XXX spin chain}{lstlisting.4}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {4}{\ignorespaces Constructing the dense Hamiltonian matrix for the 1D Heisenberg XXX spin chain.}}{5}{lstlisting.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Rodeo spectrum for the $L=3$ Heisenberg XXX model. Continuous red lines show the simulated filter, exactly intersecting theoretical eigenvalues (stems).}}{5}{figure.caption.14}\protected@file@percent }
+\newlabel{fig:heisenberg}{{7}{5}{Rodeo spectrum for the $L=3$ Heisenberg XXX model. Continuous red lines show the simulated filter, exactly intersecting theoretical eigenvalues (stems)}{figure.caption.14}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Conclusions}{5}{section.5}\protected@file@percent }
+\newlabel{sec:conclusions}{{5}{5}{Conclusions}{section.5}{}}
+\gdef \@abspage@last{5}
